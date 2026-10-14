@@ -1,4 +1,8 @@
 ﻿#include "cbuildindlg.h"
+#include <QtPrintSupport/qprinter.h>
+#include <QtPrintSupport/qpagesetupdialog.h>
+#include <QtPrintSupport/QPrintDialog>
+#include <QtPrintSupport/QPrintPreviewDialog>
 #include <QDebug>
 
 CBuildInDlg::CBuildInDlg(QWidget *parent)
@@ -64,6 +68,52 @@ void CBuildInDlg:: doPushBtn(){
         if(color.isValid()){
             palette.setColor(QPalette::Text,color);
             displayTextEdit->setPalette(palette);
+        }
+    }
+    if(btn==progressPushBtn){
+        QProgressDialog progress(QStringLiteral("正在複製檔案"),QStringLiteral("取消"),0,100000,this);
+        progress.setWindowTitle(QStringLiteral("進度對話方塊"));
+        progress.show();
+        for(int i=0;i<100000;i++){
+            progress.setValue(i);
+            qApp->processEvents();
+            if(progress.wasCanceled())
+                break;
+            qDebug()<<i;
+        }
+        progress.setValue((100000));
+    }
+    if(btn==errorPushBtn){
+        QErrorMessage box(this);
+        box.setWindowTitle(QStringLiteral("錯誤訊息盒"));
+        box.showMessage(QStringLiteral("錯誤訊息盒xx:"));
+        box.showMessage(QStringLiteral("錯誤訊息盒yy:"));
+        box.showMessage(QStringLiteral("錯誤訊息盒zz:"));
+        box.exec();
+    }
+    if(btn==fontPushBtn){
+        bool ok;
+        const QFont& font=QFontDialog::getFont(&ok,displayTextEdit->font(),this,QStringLiteral("字體對話盒"));
+        if(ok) displayTextEdit->setFont(font);
+    }
+    if(btn==inputPushBtn){
+        bool ok;
+        QString text=QInputDialog::getText(this,QStringLiteral("輸入對話盒"),QStringLiteral("輸入文字"),QLineEdit::Normal,QDir::home().dirName(),&ok);
+        if(ok&&!text.isEmpty()) displayTextEdit->setText(text);
+
+    }
+    if(btn==printPushBtn){
+        QPrinter printer(QPrinter::HighResolution);
+        QPrintDialog dialog(&printer,this);
+        if(dialog.exec()!=QDialog::Accepted)
+            return;
+    }
+    if(btn==pagePushBtn){
+        QPrinter printer(QPrinter::HighResolution);
+        QPageSetupDialog* dlg=new QPageSetupDialog(&printer,this);
+        dlg->setWindowTitle(QStringLiteral("頁面設定方塊"));
+        if(dlg->exec()==QDialog::Accepted){
+
         }
     }
 }
